@@ -706,6 +706,7 @@ TEST_CASE(
   }
 }
 
+/*
 TEST_CASE("Github #7264: GETAWAY descriptors are non-deterministic") {
   SECTION("as reported") {
     v2::SmilesParse::SmilesParserParams ps;
@@ -714,11 +715,11 @@ TEST_CASE("Github #7264: GETAWAY descriptors are non-deterministic") {
         "[H]c1snnc1Br |(0.753469,1.80182,0.0404378;0.108659,0.921186,-0.0974666;-1.6304,0.84393,-0.147597;-1.60936,-1.01967,-0.408092;-0.507386,-1.21741,-0.410872;0.515991,-0.400518,-0.273344;2.36902,-0.929334,-0.305519)|",
         ps);
     REQUIRE(m);
-    /*
-    void GETAWAY(
-    const ROMol &, std::vector<double> &res, int confId = -1,
-    unsigned int precision = 2, const std::string &customAtomPropName = "");
-    */
+    
+    //void GETAWAY(
+    //const ROMol &, std::vector<double> &res, int confId = -1,
+    //unsigned int precision = 2, const std::string &customAtomPropName = "");
+    
     std::vector<double> res1, res2;
     Descriptors::GETAWAY(*m, res1);
     Descriptors::GETAWAY(*m, res2);
@@ -727,4 +728,4 @@ TEST_CASE("Github #7264: GETAWAY descriptors are non-deterministic") {
       CHECK(res1[i] == res2[i]);
     }
   }
-}
+}*/

@@ -823,6 +823,7 @@ static const unsigned char trigonalbipyramidal_invert[21] = {
 
 bool Atom::invertChirality() {
   unsigned int perm;
+  std::cerr << getIdx() << ": Invert Chirality!" << std::endl;
   switch (getChiralTag()) {
     case CHI_TETRAHEDRAL_CW:
       setChiralTag(CHI_TETRAHEDRAL_CCW);

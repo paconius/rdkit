@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
-// #define VERBOSE_CANON 1
+//#define VERBOSE_CANON 1
 
 namespace RDKit {
 namespace Canon {
@@ -296,6 +296,7 @@ void rankWithFunctor(T &ftor, bool breakTies, int *order, bool useSpecial,
       ties = true;
     }
   }
+  std::cerr << "Functor: " << useChirality << " " << ties << " " <<  includeRingStereo << std::endl;
   if (useChirality && ties && includeRingStereo) {
     SpecialChiralityAtomCompareFunctor scftor(atoms, mol, atomsInPlay,
                                               bondsInPlay);
@@ -781,6 +782,14 @@ void rankMolAtoms(const ROMol &mol, std::vector<unsigned int> &res,
   ftor.df_useAtomMaps = includeAtomMaps;
   ftor.df_useNonStereoRanks = useNonStereoRanks;
   ftor.df_useChiralPresence = includeChiralPresence;
+  std::cerr << "ftor: ";
+  std::cerr << ftor.df_useIsotopes << " ";
+  std::cerr << ftor.df_useChirality << " ";
+  std::cerr << ftor.df_useChiralityRings << " ";
+  std::cerr << ftor.df_useAtomMaps << " ";
+  std::cerr << ftor.df_useNonStereoRanks << " ";
+  std::cerr << ftor.df_useChiralPresence << " ";
+  std::cerr << std::endl;
 
   auto order = std::make_unique<int[]>(mol.getNumAtoms());
   detail::rankWithFunctor(ftor, breakTies, order.get(), true, includeChirality,

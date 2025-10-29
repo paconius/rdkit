@@ -530,6 +530,7 @@ class RDKIT_GRAPHMOL_EXPORT AtomCompareFunctor {
     }
     int v = basecomp(i, j);
     if (v) {
+//      std::cerr << "basecomp: " << v << std::endl;
       return v;
     }
 
@@ -615,6 +616,7 @@ class RDKIT_GRAPHMOL_EXPORT ChiralAtomCompareFunctor {
     }
 
     // atom stereochem:
+    std::cerr << "Chiral atom comparator." << std::endl;
     ivi = 0;
     ivj = 0;
     std::string cipCode;
@@ -708,16 +710,15 @@ void RefinePartitions(const ROMol &mol, canon_atom *atoms, CompareFunc compar,
 
   // std::cerr<<"&&&&&&&&&&&&&&&& RP"<<std::endl;
   while (activeset != -1) {
-    // std::cerr<<"ITER: "<<activeset<<" next: "<<next[activeset]<<std::endl;
-    // std::cerr<<" next: ";
-    // for(unsigned int ii=0;ii<nAtoms;++ii){
-    //   std::cerr<<ii<<":"<<next[ii]<<" ";
-    // }
-    // std::cerr<<std::endl;
-    // for(unsigned int ii=0;ii<nAtoms;++ii){
-    //   std::cerr<<order[ii]<<" count: "<<count[order[ii]]<<" index:
-    //   "<<atoms[order[ii]].index<<std::endl;
-    // }
+//    std::cerr<<"ITER: "<<activeset<<" next: "<<next[activeset]<<std::endl;
+//    std::cerr<<" next: ";
+//     for(unsigned int ii=0;ii<nAtoms;++ii){
+//       std::cerr<<ii<<":"<<next[ii]<<" ";
+//     }
+//     std::cerr<<std::endl;
+//     for(unsigned int ii=0;ii<nAtoms;++ii){
+//       std::cerr<<order[ii]<<" count: "<<count[order[ii]]<<" index:" << atoms[order[ii]].index<<std::endl;
+//     }
 
     partition = activeset;
     activeset = next[partition];

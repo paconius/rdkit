@@ -1019,6 +1019,7 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
   UINT_VECT cyclesAvailable(MAX_CYCLES, 1);
   VECT_INT_VECT cycles(nAtoms);
 
+ // std::cerr << "Start canonicalizeFragment" << std::endl;
   boost::dynamic_bitset<> ringStereoChemAdjusted(nAtoms);
 
   // make sure that we've done the stereo perception:
@@ -1077,6 +1078,17 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
 
           const unsigned int firstIdx = molStack.begin()->obj.atom->getIdx();
           const bool firstInPart = atom->getIdx() == firstIdx;
+          INT_LIST ref;
+          for (const auto bnd : atom->getOwningMol().atomBonds(atom)) {
+            ref.push_back(bnd->getIdx());
+          }
+          /*std::cerr << "trueOrder: ";
+          std::copy(trueOrder.begin(), trueOrder.end(), std::ostream_iterator<int>(std::cerr, " "));
+          std::cerr << atom->getPerturbationOrder(trueOrder);
+          std::cerr << std::endl;
+          std::cerr << "actOrder: ";
+          std::copy(ref.begin(), ref.end(), std::ostream_iterator<int>(std::cerr, " "));
+          std::cerr << std::endl; */
 
           // We have to make sure that trueOrder contains all the
           // bonds, even if they won't be written to the SMILES
@@ -1090,6 +1102,9 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
                 break;
               }
             }
+            std::cerr << "tOrder: ";
+            std::copy(tOrder.begin(), tOrder.end(), std::ostream_iterator<int>(std::cerr, " "));
+            std::cerr << std::endl;
             if (!perm) {
               nSwaps = atom->getPerturbationOrder(tOrder);
             } else {
@@ -1119,7 +1134,8 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
             //   we'll be dumping it without the H, which entails a
             //   reordering:
             //     [C@@H](F)(O)C
-            ++nSwaps;
+           ++nSwaps;
+            std::cerr << "BUMP DA SWAPS!" << std::endl;
           }
           if (nSwaps % 2) {
             numSwapsChiralAtoms.set(atom->getIdx());
@@ -1174,8 +1190,10 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
                     atomVisitOrders[msI.obj.atom->getIdx()]) {
               mol.getAtomWithIdx(nbrIdx)->setChiralTag(
                   msI.obj.atom->getChiralTag());
+//              std::cerr << "INITIAL SET" << std::endl;
               if (nbrV < 0) {
                 mol.getAtomWithIdx(nbrIdx)->invertChirality();
+//                std::cerr << "Invert 1" << std::endl;
               }
               // Odd number of swaps for first chiral ring atom --> needs to be
               // swapped but we want to retain chirality
@@ -1184,6 +1202,7 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
                 // swapped but we want to retain chirality
                 if (!numSwapsChiralAtoms[nbrIdx]) {
                   mol.getAtomWithIdx(nbrIdx)->invertChirality();
+//                  std::cerr << "Invert 2" << std::endl;
                 }
               }
               // Even number of swaps for first chiral ring atom --> don't need
@@ -1193,6 +1212,7 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
                 // swapped
                 if (numSwapsChiralAtoms[nbrIdx]) {
                   mol.getAtomWithIdx(nbrIdx)->invertChirality();
+//                  std::cerr << "Invert 3" << std::endl;
                 }
               }
               ringStereoChemAdjusted.set(nbrIdx);
@@ -1203,23 +1223,28 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
                    mol.getStereoGroups().size() > sgidx) {
           // make sure that the reference atom in the stereogroup is CCW
           auto &sg = mol.getStereoGroups()[sgidx];
-          bool swapIt =
-              msI.obj.atom->getChiralTag() == Atom::CHI_TETRAHEDRAL_CW;
-          if (swapIt) {
-            msI.obj.atom->invertChirality();
+//          std::cerr << &msI.obj.atom->getOwningMol() << std::endl;
+          std::cerr << msI.obj.atom->getIdx() << "-" << sgidx << msI.obj.atom->getSymbol() << ": StereoGroup numSwaps: " << numSwapsChiralAtoms << " " << numSwapsChiralAtoms[msI.obj.atom->getIdx()] << " " << msI.obj.atom->getChiralTag() << sg << std::endl;
+          if(msI.obj.atom->getChiralTag() == Atom::CHI_TETRAHEDRAL_CW) {
+            std::cerr << "BAD STEREO CW INPUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
           }
-          if (swapIt || numSwapsChiralAtoms[msI.obj.atom->getIdx()]) {
-            for (auto at : sg.getAtoms()) {
-              if (at == msI.obj.atom) {
-                continue;
+          if (numSwapsChiralAtoms[msI.obj.atom->getIdx()]) {
+            msI.obj.atom->invertChirality();
+            if (sg.getAtoms().size() > 1) {
+              for (auto at : sg.getAtoms()) {
+                if (true) { //numSwapsChiralAtoms[at->getIdx()]) {
+                  //at->invertChirality();
+                }
               }
-              at->invertChirality();
             }
           }
-
         } else {
           if (msI.obj.atom->getChiralTag() == Atom::CHI_TETRAHEDRAL_CW ||
               msI.obj.atom->getChiralTag() == Atom::CHI_TETRAHEDRAL_CCW) {
+            size_t sgidx = 99999;
+            msI.obj.atom->getPropIfPresent("_stereoGroup", sgidx);
+//            std::cerr << &msI.obj.atom->getOwningMol() << std::endl;
+            std::cerr << msI.obj.atom->getIdx() << ": Invert 5: " << numSwapsChiralAtoms << " " << numSwapsChiralAtoms[msI.obj.atom->getIdx()] << " " << msI.obj.atom->getChiralTag() << " " << sgidx << msI.obj.atom->getSymbol() << std::endl;
             if ((numSwapsChiralAtoms[msI.obj.atom->getIdx()])) {
               msI.obj.atom->invertChirality();
             }
@@ -1242,12 +1267,21 @@ void canonicalizeEnhancedStereo(ROMol &mol,
   if (sgs.empty()) {
     return;
   }
-
+  if (atomRanks){
+  std::cerr << "CES start ranks: ";
+  std::copy(atomRanks->begin(), atomRanks->end(), std::ostream_iterator<int>(std::cerr, " "));
+  std::cerr << std::endl;
+  } else {
+  std::cerr << "CES NO START RANKS!" << std::endl;
+  }
   std::vector<unsigned int> lranks;
   if (!atomRanks) {
     bool breakTies = true;
     rankMolAtoms(mol, lranks, breakTies);
     atomRanks = &lranks;
+    std::cerr << "...CES assigned ranks: ";
+    std::copy(atomRanks->begin(), atomRanks->end(), std::ostream_iterator<int>(std::cerr, " "));
+    std::cerr << std::endl;
   }
   // one thing that makes this all easier is that the stereogroups are
   // independent of each other
@@ -1311,6 +1345,7 @@ void canonicalizeEnhancedStereo(ROMol &mol,
       // and flip them all:
 
       for (auto atom : sgAtoms) {
+        std::cerr << atom->getIdx() << ": CES: Invert!" << std::endl;
         atom->invertChirality();
       }
       for (auto bond : sgBonds) {

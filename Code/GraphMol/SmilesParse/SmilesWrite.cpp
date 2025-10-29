@@ -397,7 +397,9 @@ std::string FragmentSmilesConstruct(
   }
   std::list<unsigned int> ringClosuresToErase;
 
+  std::cerr << "CES choice?: " << params.canonical << " " <<  params.doIsomericSmiles << std::endl;
   if (params.canonical && params.doIsomericSmiles) {
+    std::cerr << "Run CES within fragmentsmielsconstruct" << std::endl;
     Canon::canonicalizeEnhancedStereo(mol, &ranks);
   }
   Canon::canonicalizeFragment(mol, atomIdx, colors, ranks, molStack,
@@ -499,7 +501,9 @@ std::string MolToSmiles(const ROMol &mol, const SmilesWriteParams &params,
       params.rootedAtAtom < 0 ||
           static_cast<unsigned int>(params.rootedAtAtom) < mol.getNumAtoms(),
       "rootedAtAtom must be less than the number of atoms");
-
+  std::cerr << params.doIsomericSmiles << " " << params.doKekule << " " << params.canonical << " " << params.cleanStereo  \
+    << " " << params.allBondsExplicit << " " << params.allHsExplicit << " " << params.rootedAtAtom << " " << params.includeDativeBonds \
+    << " " << params.ignoreAtomMapNumbers << std::endl;
   int rootedAtAtom;
   std::vector<int> fragsRootedAtAtom;
   std::vector<std::vector<int>> fragsMolAtomMapping;
@@ -522,7 +526,7 @@ std::string MolToSmiles(const ROMol &mol, const SmilesWriteParams &params,
       rootedAtAtom = params.rootedAtAtom - atsPresent.find_first();
     }
     fragsRootedAtAtom.push_back(rootedAtAtom);
-
+    std::cerr << "rootL: " << rootedAtAtom << std::endl;
     for (const auto bnd : mol.bonds()) {
       if (atsPresent[bnd->getBeginAtomIdx()] &&
           atsPresent[bnd->getEndAtomIdx()]) {
@@ -645,6 +649,9 @@ std::string MolToSmiles(const ROMol &mol, const SmilesWriteParams &params,
                           includeIsotopes, includeAtomMaps,
                           includeChiralPresence, includeStereoGroups,
                           useNonStereoRanks);
+      std::cerr << "ranks: ";
+      std::copy(ranks.begin(), ranks.end(), std::ostream_iterator<int>(std::cerr, " "));
+      std::cerr << std::endl; // Add a newline for clarity
       if (params.ignoreAtomMapNumbers) {
         for (auto atom : tmol->atoms()) {
           atom->setAtomMapNum(atomMapNums[atom->getIdx()]);

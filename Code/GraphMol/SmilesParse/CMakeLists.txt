@@ -80,6 +80,7 @@ rdkit_catch_test(cxsmilesTest cxsmiles_test.cpp LINK_LIBRARIES FileParsers Smile
 
 rdkit_test(smaTest1 smatest.cpp LINK_LIBRARIES SmilesParse SubstructMatch  )
 rdkit_catch_test(smiTestCatch catch_tests.cpp LINK_LIBRARIES FileParsers SmilesParse )
+rdkit_catch_test(customTests custom_test.cpp LINK_LIBRARIES FileParsers SmilesParse )
 rdkit_catch_test(nontetrahedralCatch nontetrahedral_tests.cpp LINK_LIBRARIES FileParsers SmilesParse )
 rdkit_catch_test(v2smiTestCatch v2catch_tests.cpp LINK_LIBRARIES SmilesParse )
 rdkit_catch_test(smartsTestCatch smarts_catch_tests.cpp LINK_LIBRARIES FileParsers SmilesParse )
